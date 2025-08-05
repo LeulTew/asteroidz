@@ -40,6 +40,12 @@ def main():
                 print("Game over!")
                 pygame.quit()
                 exit()
+        # Collision check: bullets vs asteroids
+        for asteroid in asteroids:
+            for shot in shots:
+                if shot.collide(asteroid):
+                    asteroid.split()
+                    shot.kill()
         # 3. Draw the game to the screen
         screen.fill((0, 0, 0))
         for obj in drawable:
