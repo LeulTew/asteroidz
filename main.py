@@ -6,6 +6,8 @@ def main():
     print("Starting Asteroids!")
     print(f"Screen width: {SCREEN_WIDTH}\nScreen height: {SCREEN_HEIGHT}")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    fpsClock = pygame.time.Clock()
+    dt = 0
     # Game loop
     while True:
         # 1. Check for player inputs
@@ -17,6 +19,7 @@ def main():
         # 3. Draw the game to the screen
         screen.fill((0, 0, 0))
         pygame.display.flip()
+        dt = fpsClock.tick(60) / 1000.0  # Limit to 60 FPS and set delta time
 
 if __name__ == "__main__":
     main()
