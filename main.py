@@ -4,6 +4,8 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+from explosion import Explosion
+from background import draw_background
 
 def main():
     pygame.init()
@@ -22,10 +24,14 @@ def main():
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable,)
     Shot.containers = (shots, updatable, drawable)
+    Explosion.containers = (updatable, drawable)
     # Instantiate player in the middle of the screen
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     # Instantiate asteroid field
     asteroid_field = AsteroidField()
+    score = 0
+    lives = PLAYER_LIVES
+    font = pygame.font.Font(None, 36)
     # Game loop
     while True:
         # 1. Check for player inputs
@@ -35,21 +41,35 @@ def main():
         # 2. Update the game world
         updatable.update(dt)
         # Collision check: player vs asteroids
-        for asteroid in asteroids:
+        for asteroid in list(asteroids):
             if player.collide(asteroid):
-                print("Game over!")
-                pygame.quit()
-                exit()
+                lives -= 1
+                if lives <= 0:
+                    print("Game over!")
+                    pygame.quit()
+                    exit()
+                else:
+                    player.kill()
+                    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         # Collision check: bullets vs asteroids
-        for asteroid in asteroids:
-            for shot in shots:
+        for asteroid in list(asteroids):
+            for shot in list(shots):
                 if shot.collide(asteroid):
-                    asteroid.split()
+                    score += asteroid.split()
                     shot.kill()
         # 3. Draw the game to the screen
-        screen.fill((0, 0, 0))
+        draw_background(screen)
         for obj in drawable:
             obj.draw(screen)
+        # Draw score
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+        # Draw lives
+        lives_text = font.render(f"Lives: {lives}", True, (255, 255, 255))
+        screen.blit(lives_text, (SCREEN_WIDTH - lives_text.get_width() - 10, 10))
+        # Draw weapon type
+        weapon_text = font.render(f"Weapon: {'Normal' if player.weapon_type == WEAPON_TYPE_NORMAL else 'Shotgun'}", True, (255, 255, 255))
+        screen.blit(weapon_text, (10, 50))
         pygame.display.flip()
         dt = fpsClock.tick(60) / 1000.0  # Limit to 60 FPS and set delta time
 
