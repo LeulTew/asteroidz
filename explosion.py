@@ -7,10 +7,15 @@ class Explosion(pygame.sprite.Sprite):
         else:
             super().__init__()
         self.position = position
-        self.lifetime = 0.4  # seconds
+        self.lifetime = 0.6  # seconds
         self.time = 0
         self.radius = 10
-        self.max_radius = 60
+        self.max_radius = 80
+        
+        # Add particles to global particle system
+        from main import particle_system
+        if particle_system:
+            particle_system.add_explosion(position)
 
     def update(self, dt):
         self.time += dt
@@ -23,16 +28,14 @@ class Explosion(pygame.sprite.Sprite):
         alpha = int(255 * (1 - progress))
         
         # Draw multiple circles for a simple explosion effect
-        color1 = (255, 0, 0, alpha)
-        color2 = (255, 165, 0, alpha)
-        color3 = (255, 255, 0, alpha)
+        colors = [
+            (255, 0, 0, alpha),
+            (255, 165, 0, alpha), 
+            (255, 255, 0, alpha)
+        ]
 
-        # To draw with alpha, we need a temporary surface
-        target_rect = pygame.Rect(self.position.x - current_radius, self.position.y - current_radius, current_radius * 2, current_radius * 2)
-        surface = pygame.Surface(target_rect.size, pygame.SRCALPHA)
-        
-        pygame.draw.circle(surface, color1, (current_radius, current_radius), current_radius)
-        pygame.draw.circle(surface, color2, (current_radius, current_radius), int(current_radius * 0.7))
-        pygame.draw.circle(surface, color3, (current_radius, current_radius), int(current_radius * 0.4))
-        
-        screen.blit(surface, target_rect.topleft)
+        # Simple circle explosion without alpha blending
+        for i, color in enumerate(colors):
+            radius = int(current_radius * (1 - i * 0.3))
+            if radius > 0:
+                pygame.draw.circle(screen, color[:3], self.position, radius, 2)
